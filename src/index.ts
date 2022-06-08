@@ -9,23 +9,29 @@ const client = createClient({
     url: 'redis://localhost:6379',
 });
 
-await client.connect();
+(async () => {
+    await client.connect();
 
-while (client.isOpen) {
-    const current_task = await client.lIndex(REDIS_WORKDER, 0);
+    while (client.isOpen) {
+        const current_task = await client.lIndex(REDIS_WORKDER, 0);
 
-    console.log('current_task', current_task);
+        console.log('current_task', current_task);
 
-    if (current_task) {
-        await processJob(current_task);
-        await client.lRem(REDIS_WORKDER, -1, current_task);
+        if (current_task) {
+            await processJob(current_task);
+            await client.lRem(REDIS_WORKDER, -1, current_task);
+        }
+
+        const next_task = await client.brPopLPush(
+            REDIS_QUEUE,
+            REDIS_WORKDER,
+            0
+        );
+
+        console.log('next_task', current_task);
+
+        await processJob(next_task);
+
+        await client.lRem(REDIS_WORKDER, -1, next_task);
     }
-
-    const next_task = await client.brPopLPush(REDIS_QUEUE, REDIS_WORKDER, 0);
-
-    console.log('next_task', current_task);
-
-    await processJob(next_task);
-
-    await client.lRem(REDIS_WORKDER, -1, next_task);
-}
+})();
