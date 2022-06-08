@@ -28,7 +28,7 @@ const client = createClient({
             0
         );
 
-        console.log('next_task', current_task);
+        console.log('next_task', next_task);
 
         await processJob(next_task);
 
