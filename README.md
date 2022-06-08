@@ -2,13 +2,13 @@
 
 ## Goals
 
-- Docker Container
-- CI/CD Pipeline
-- Redis Queue
-- Generate Screenshot
-- Store blobs in Redis
+* [ ] Docker Container
+* [ ] CI/CD Pipeline
+* [ ] Redis Queue
+* [ ] Generate Screenshot
+* [ ] Store blobs in Redis
 
-- Store different resolution images, cache them for different amounts
+* [ ]  Store different resolution images, cache them for different amounts
 
 ### Resizing Example
 
