@@ -1,0 +1,24 @@
+{
+    "name": "edge-renderer",
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": "https://github.com/lvkdotsh/edge-renderer.git",
+    "author": "Lucemans <luc@lucemans.nl>",
+    "license": "MIT",
+    "dependencies": {
+        "@lvksh/logger": "^1.6.3",
+        "redis": "^4.1.0"
+    },
+    "devDependencies": {
+        "@typescript-eslint/parser": "^5.27.1",
+        "eslint": "^8.17.0",
+        "eslint-plugin-lvksh": "^1.4.1",
+        "ts-node": "^10.8.1",
+        "typescript": "^4.7.3"
+    },
+    "scripts": {
+        "lint": "eslint -c .eslintrc.json --ext .ts ./src",
+        "dev": "ts-node-dev ./src/index.ts",
+        "start": "ts-node ./src/index.ts"
+    }
+}
