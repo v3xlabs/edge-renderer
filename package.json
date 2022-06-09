@@ -8,6 +8,7 @@
     "dependencies": {
         "@lvksh/logger": "^1.6.3",
         "@prokopschield/website-screenshot": "^0.1.0-1",
+        "ps-std": "^0.1.3",
         "redis": "^4.1.0",
         "require-gpl": "^0.1.2",
         "scyllo": "^1.3.0"
