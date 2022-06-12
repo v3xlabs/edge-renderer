@@ -21,6 +21,7 @@
     "scripts": {
         "lint": "eslint -c .eslintrc.json --ext .ts ./src",
         "dev": "ts-node-dev ./src/index.ts",
-        "start": "ts-node ./src/index.ts"
+        "start": "ts-node ./src/index.ts",
+        "db": "cd ./tools && docker-compose up -d"
     }
 }
