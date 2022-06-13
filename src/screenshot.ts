@@ -1,4 +1,4 @@
-import Pageres from 'pageres';
+import puppeteer from 'puppeteer';
 
 const defaultResolution: string[] = ['1200x900', '1920x1080'];
 const defaultDelay: number = 2;
@@ -12,20 +12,35 @@ export const screenshot = async (
 
     if (!delay) delay = defaultDelay;
 
-    const buffers = await new Pageres({ delay, crop: true })
-        .src(url, resolutions)
-        .run();
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.goto(url, {
+        waitUntil: 'networkidle0',
+    });
 
     const output: Record<string, string> = {};
 
-    let index = 0;
+    for (const resolution of resolutions) {
+        const [width, height] = resolution.split('x').map(Number);
 
-    for (const buffer of buffers) {
-        // eslint-disable-next-line unicorn/prefer-at
-        output[resolutions[index]] = buffer.toString('binary');
+        await page.setViewport({ width, height });
 
-        index++;
+        const buffer = (await page.screenshot({
+            type: 'webp',
+            encoding: 'binary',
+            fullPage: false,
+        })) as Buffer;
+
+        output[resolution] = buffer.toString('binary');
     }
+
+    // for (const buffer of buffers) {
+    //     // eslint-disable-next-line unicorn/prefer-at
+    //     output[resolutions[index]] = buffer.toString('binary');
+
+    //     index++;
+    // }
 
     return output;
 };
