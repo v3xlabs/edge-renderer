@@ -6,8 +6,11 @@ import { logger } from './logger';
 const REDIS_QUEUE = 'edge_render_q';
 const REDIS_WORKDER = 'edge_render_q_1';
 
+const host = process.env.REDIS_HOST || 'localhost';
+const port = process.env.REDIS_PORT || 6379;
+
 const client = createClient({
-    url: 'redis://localhost:6379',
+    url: `redis://${host}:${port}`,
 });
 
 // You _can_ get the type like this but this is hard to do for all types:
