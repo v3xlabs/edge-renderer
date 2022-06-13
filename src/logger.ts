@@ -5,6 +5,7 @@ export const logger = createLogger(
         queue: 'QUEUE',
         system: 'SYSTEM',
         debug: 'DEBUG',
+        error: 'ERROR',
     },
     { divider: ' | ' }
 );
