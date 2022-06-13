@@ -3,6 +3,8 @@ import puppeteer from 'puppeteer';
 const defaultResolution: string[] = ['1200x900', '1920x1080'];
 const defaultDelay: number = 2;
 
+const chrome_path = process.env.CHROME_PATH;
+
 export const screenshot = async (
     url: string,
     resolutions?: string[],
@@ -12,7 +14,15 @@ export const screenshot = async (
 
     if (!delay) delay = defaultDelay;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch(
+        chrome_path
+            ? {
+                  executablePath: chrome_path,
+                  args: ['--no-sandbox'],
+              }
+            : {}
+    );
+
     const page = await browser.newPage();
 
     await page.goto(url, {
