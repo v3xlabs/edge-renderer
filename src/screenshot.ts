@@ -41,7 +41,7 @@ export const screenshot = async (
     await page.setViewport({ width, height });
 
     const buffer = (await page.screenshot({
-        type: 'webp',
+        type: 'png',
         encoding: 'binary',
         fullPage: false,
     })) as Buffer;
