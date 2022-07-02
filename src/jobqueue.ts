@@ -22,7 +22,7 @@ export const processJob = async (redis: RedisClientType, task: JobData) => {
 
     for (const [variant, data] of Object.entries(images)) {
         redis.hSet(`images:${task.id}`, variant, data);
-        redis.expire(`images:${task.id}`, 600);
+        redis.expire(`images:${task.id}`, 60 * 60 * 24 * 30 * 3); // 90 days
     }
 
     // Expire after x amount of time
