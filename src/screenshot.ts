@@ -14,7 +14,7 @@ export type JobData = {
 
 export const screenshot = async (
     job: JobData
-): Promise<Record<string, string>> => {
+): Promise<Record<string, string | Buffer>> => {
     // if (!resolutions) resolutions = defaultResolution;
 
     // if (!delay) delay = defaultDelay;
@@ -34,19 +34,19 @@ export const screenshot = async (
         waitUntil: 'networkidle0',
     });
 
-    const output: Record<string, string> = {};
+    const output: Record<string, string | Buffer> = {};
 
     const [width, height] = job.viewport.split('x').map(Number);
 
     await page.setViewport({ width, height });
 
-    const buffer = (await page.screenshot({
-        type: 'png',
+    const buffer = await page.screenshot({
+        type: 'webp',
         encoding: 'binary',
         fullPage: false,
-    })) as Buffer;
+    });
 
-    output['root'] = buffer.toString('binary');
+    output['root'] = buffer;
 
     // for (const buffer of buffers) {
     //     // eslint-disable-next-line unicorn/prefer-at
@@ -54,6 +54,9 @@ export const screenshot = async (
 
     //     index++;
     // }
+
+    await page.close();
+    await browser.close();
 
     return output;
 };
