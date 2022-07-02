@@ -1,15 +1,15 @@
 import { RedisClientType } from '.';
 import { logger } from './logger';
-import { screenshot } from './screenshot';
+import { JobData, screenshot } from './screenshot';
 
-export const processJob = async (redis: RedisClientType, task: string) => {
+export const processJob = async (redis: RedisClientType, task: JobData) => {
     logger.debug('processingJob', task);
 
     let url: URL;
 
     try {
         // Will fail if not a valid url
-        url = new URL(task);
+        url = new URL(task.url);
     } catch {
         logger.error('Invalid task', task);
 
@@ -18,10 +18,10 @@ export const processJob = async (redis: RedisClientType, task: string) => {
 
     const images = await screenshot(task);
 
-    logger.debug('images', images);
+    logger.debug('images', Object.keys(images));
 
-    for (const [resolution, data] of Object.entries(images)) {
-        redis.hSet(`images:${url.hostname}`, resolution, data);
+    for (const [variant, data] of Object.entries(images)) {
+        redis.hSet(`images:${task.id}`, variant, data);
     }
 
     // Expire after x amount of time

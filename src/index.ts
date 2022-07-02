@@ -1,7 +1,9 @@
 import { createClient } from 'redis';
 
+import { setupHTTP } from './httpserver';
 import { processJob } from './jobqueue';
 import { logger } from './logger';
+import { JobData } from './screenshot';
 
 const REDIS_QUEUE = 'edge_render_q';
 const REDIS_WORKDER = 'edge_render_q_1';
@@ -19,13 +21,19 @@ export type RedisClientType = ReturnType<typeof createClient>;
 (async () => {
     await client.connect();
 
+    if (!client.isOpen) return;
+
+    // await setupHTTP();
+
     while (client.isOpen) {
         const current_task = await client.lIndex(REDIS_WORKDER, 0);
 
         logger.debug('current_task', current_task);
 
         if (current_task) {
-            await processJob(client, current_task);
+            const task = JSON.parse(current_task) as JobData;
+
+            await processJob(client, task);
             await client.lRem(REDIS_WORKDER, -1, current_task);
             continue;
         }
@@ -38,13 +46,15 @@ export type RedisClientType = ReturnType<typeof createClient>;
 
         logger.debug('next_task', next_task);
 
-        if (!next_task) {
-            logger.debug('Next task did not appear to exist');
+        if (next_task) {
+            const task = JSON.parse(next_task) as JobData;
+
+            await processJob(client, task);
+
+            await client.lRem(REDIS_WORKDER, -1, next_task);
             continue;
         }
 
-        await processJob(client, next_task);
-
-        await client.lRem(REDIS_WORKDER, -1, next_task);
+        logger.debug('Next task did not appear to exist');
     }
 })();

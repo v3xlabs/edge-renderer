@@ -5,14 +5,19 @@ const defaultDelay: number = 2;
 
 const chrome_path = process.env.CHROME_PATH;
 
-export const screenshot = async (
-    url: string,
-    resolutions?: string[],
-    delay?: number
-): Promise<Record<string, string>> => {
-    if (!resolutions) resolutions = defaultResolution;
+export type JobData = {
+    id: string;
+    url: string;
+    viewport: `${number}x${number}`;
+    scales: `${number}`[];
+};
 
-    if (!delay) delay = defaultDelay;
+export const screenshot = async (
+    job: JobData
+): Promise<Record<string, string>> => {
+    // if (!resolutions) resolutions = defaultResolution;
+
+    // if (!delay) delay = defaultDelay;
 
     const browser = await puppeteer.launch(
         chrome_path
@@ -25,25 +30,23 @@ export const screenshot = async (
 
     const page = await browser.newPage();
 
-    await page.goto(url, {
+    await page.goto(job.url, {
         waitUntil: 'networkidle0',
     });
 
     const output: Record<string, string> = {};
 
-    for (const resolution of resolutions) {
-        const [width, height] = resolution.split('x').map(Number);
+    const [width, height] = job.viewport.split('x').map(Number);
 
-        await page.setViewport({ width, height });
+    await page.setViewport({ width, height });
 
-        const buffer = (await page.screenshot({
-            type: 'webp',
-            encoding: 'binary',
-            fullPage: false,
-        })) as Buffer;
+    const buffer = (await page.screenshot({
+        type: 'webp',
+        encoding: 'binary',
+        fullPage: false,
+    })) as Buffer;
 
-        output[resolution] = buffer.toString('binary');
-    }
+    output['root'] = buffer.toString('binary');
 
     // for (const buffer of buffers) {
     //     // eslint-disable-next-line unicorn/prefer-at
