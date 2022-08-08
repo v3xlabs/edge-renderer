@@ -1,6 +1,8 @@
 import puppeteer from 'puppeteer';
 import sharp from 'sharp';
 
+import { logger } from './logger';
+
 const defaultResolution: string[] = ['1200x900', '1920x1080'];
 const defaultDelay: number = 2;
 
@@ -13,9 +15,12 @@ export type JobData = {
     scales: `${number}`[];
 };
 
-export const screenshot = async (
-    job: JobData
-): Promise<Record<string, string | Buffer>> => {
+export type JobResultData = {
+    images: Record<string, string | Buffer>;
+    favicon?: string;
+};
+
+export const screenshot = async (job: JobData): Promise<JobResultData> => {
     // if (!resolutions) resolutions = defaultResolution;
 
     // if (!delay) delay = defaultDelay;
@@ -35,7 +40,7 @@ export const screenshot = async (
         waitUntil: 'networkidle0',
     });
 
-    const output: Record<string, string | Buffer> = {};
+    const outputImages: Record<string, string | Buffer> = {};
 
     const [width, height] = job.viewport.split('x').map(Number);
     const ratio = height / width;
@@ -48,7 +53,7 @@ export const screenshot = async (
         fullPage: false,
     });
 
-    output['root'] = buffer;
+    outputImages['root'] = buffer;
 
     for (const resizeScale of job.scales) {
         const scaleW = Number.parseInt(resizeScale);
@@ -56,18 +61,31 @@ export const screenshot = async (
 
         const data = await sharp(buffer).resize(scaleW, scaleH).toBuffer();
 
-        output[scaleW] = data;
+        outputImages[scaleW] = data;
     }
 
-    // for (const buffer of buffers) {
-    //     // eslint-disable-next-line unicorn/prefer-at
-    //     output[resolutions[index]] = buffer.toString('binary');
+    /** Capture Favicon */
+    let faviconUrl = await page.evaluate(() => {
+        // eslint-disable-next-line no-undef
+        const faviconElement = document.querySelector('link[rel*="icon"]');
 
-    //     index++;
-    // }
+        return faviconElement && faviconElement.getAttribute('href');
+    });
+
+    try {
+        if (faviconUrl) {
+            logger.debug('Found favicon', faviconUrl);
+            faviconUrl = new URL(faviconUrl, job.url).toString();
+        }
+    } catch {
+        logger.error('Unable to load favicon from url', faviconUrl, job.url);
+    }
 
     await page.close();
     await browser.close();
 
-    return output;
+    return {
+        images: outputImages,
+        favicon: faviconUrl || undefined,
+    };
 };

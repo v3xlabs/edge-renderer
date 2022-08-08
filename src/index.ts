@@ -1,6 +1,5 @@
 import { createClient } from 'redis';
 
-import { setupHTTP } from './httpserver';
 import { processJob } from './jobqueue';
 import { logger } from './logger';
 import { JobData } from './screenshot';
