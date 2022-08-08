@@ -13,6 +13,8 @@ export type JobData = {
     scales: `${number}`[];
 };
 
+const blacklist_networks = [/localhost(:.*)?/];
+
 export const screenshot = async (
     job: JobData
 ): Promise<Record<string, string | Buffer>> => {
@@ -30,6 +32,20 @@ export const screenshot = async (
     );
 
     const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+
+    page.on('request', (interceptedRequest) => {
+        if (
+            blacklist_networks.some((network) =>
+                new URL(interceptedRequest.url()).host.match(network)
+            )
+        ) {
+            interceptedRequest.abort();
+        } else {
+            interceptedRequest.continue();
+        }
+    });
 
     await page.goto(job.url, {
         waitUntil: 'networkidle0',
